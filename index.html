@@ -182,6 +182,8 @@
     .debt-balance { text-align: right; }
     .debt-balance strong { display: block; font-size: 12px; }
     .debt-balance span { color: var(--muted); font-size: 9px; }
+    .debt-wide-right { display: flex; align-items: center; gap: 12px; }
+    .debt-wide-right button, .budget-item-remove { min-height: 34px; padding: 0 10px; border: 1px solid #f0d7ce; border-radius: 9px; color: #9c5238; background: #fff; font-size: 10px; font-weight: 700; }
     .plan-card { overflow: hidden; }
     .plan-top { padding: 21px 21px 17px; background: #f5f8ee; }
     .plan-top .panel-heading { margin-bottom: 13px; }
@@ -253,6 +255,16 @@
     .budget-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr); gap: 15px; align-items: start; }
     .budget-panel { padding: 20px; }
     .budget-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
+    .budget-categories { margin-top: 8px; }
+    .budget-categories-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
+    .budget-categories-head h3 { margin: 0; font-size: 11px; }
+    .budget-items { display: grid; gap: 8px; }
+    .budget-item { display: grid; grid-template-columns: minmax(0, 1fr) minmax(105px, .7fr) auto; align-items: end; gap: 8px; }
+    .budget-item .field { min-width: 0; margin: 0; }
+    .budget-add { min-height: 35px; padding: 0 10px; border: 1px solid #cfe2d4; border-radius: 9px; color: var(--green-dark); background: white; font-size: 10px; font-weight: 750; white-space: nowrap; }
+    .budget-breakdown { display: grid; gap: 9px; margin-top: 15px; }
+    .budget-line { display: flex; justify-content: space-between; gap: 9px; color: #e2eee6; font-size: 10px; }
+    .budget-line strong { margin: 0; color: white; font-size: 10px; letter-spacing: 0; }
     .budget-result { padding: 17px; border-radius: 15px; color: #fff; background: #176345; }
     .budget-result small { color: #d3e6da; font-size: 10px; }
     .budget-result strong { display: block; margin: 3px 0 9px; color: var(--lime); font-size: 28px; letter-spacing: -.8px; }
@@ -260,9 +272,6 @@
     .budget-result p { margin: 0; color: #d3e6da; font-size: 10px; }
     .budget-bar { height: 9px; overflow: hidden; margin-top: 15px; border-radius: 99px; background: rgba(255,255,255,.2); }
     .budget-bar-fill { width: 50%; height: 100%; border-radius: inherit; background: var(--lime); transition: width .2s; }
-    .budget-breakdown { display: grid; gap: 9px; margin-top: 15px; }
-    .budget-line { display: flex; justify-content: space-between; gap: 9px; color: #e2eee6; font-size: 10px; }
-    .budget-line strong { margin: 0; color: white; font-size: 10px; letter-spacing: 0; }
     .budget-disclaimer { margin: 13px 0 0; color: var(--muted); font-size: 9px; line-height: 1.55; }
     .privacy-mode .money-value,
     .privacy-mode .debt-balance strong,
@@ -339,6 +348,9 @@
       .plan-detail { padding: 15px 17px 17px; }
       .budget-panel { padding: 16px; }
       .budget-fields { grid-template-columns: 1fr; }
+      .budget-item { grid-template-columns: minmax(0, 1fr) minmax(90px, .7fr) auto; gap: 6px; }
+      .budget-add { padding: 0 8px; font-size: 9px; }
+      .debt-wide-right { align-items: flex-end; flex-direction: column; gap: 5px; }
       .premium-banner { align-items: flex-start; flex-direction: column; gap: 13px; padding: 16px; }
       .premium-action { width: 100%; justify-content: space-between; }
       .feedback-panel { padding: 15px; }
@@ -531,11 +543,12 @@
               <div class="panel-heading"><div><h2>Distribua seu mês</h2><p>Use estimativas líquidas e ajuste os campos ao seu momento.</p></div><button class="sim-reset" type="button" data-action="reset-budget">Restaurar exemplo</button></div>
               <div class="budget-fields">
                 <div class="field"><label for="budget-income">Renda líquida do mês (R$)</label><input id="budget-income" inputmode="decimal" value="4.200"></div>
-                <div class="field"><label for="budget-essentials">Moradia, contas e alimentação (R$)</label><input id="budget-essentials" inputmode="decimal" value="2.300"></div>
-                <div class="field"><label for="budget-debts">Parcelas e acordos atuais (R$)</label><input id="budget-debts" inputmode="decimal" value="550"></div>
-                <div class="field"><label for="budget-variable">Transporte e outros gastos (R$)</label><input id="budget-variable" inputmode="decimal" value="500"></div>
                 <div class="field"><label for="budget-reserve">Reserva que deseja guardar (R$)</label><input id="budget-reserve" inputmode="decimal" value="300"></div>
               </div>
+              <section class="budget-categories" aria-labelledby="budget-categories-title">
+                <div class="budget-categories-head"><h3 id="budget-categories-title">Despesas do mês</h3><button class="budget-add" type="button" data-action="add-budget-item">＋ Adicionar item</button></div>
+                <div class="budget-items" id="budget-items"></div>
+              </section>
               <p class="budget-disclaimer">Não existe orçamento perfeito. Se a soma ficar negativa, isso não é falha sua: é um sinal para priorizar necessidades básicas e procurar orientação gratuita. O app não consulta contas bancárias.</p>
             </section>
             <section class="budget-result" aria-live="polite">
@@ -543,13 +556,7 @@
               <strong class="money-value" id="budget-balance">R$ 550,00</strong>
               <p id="budget-message">Estimativa simples com base apenas nos dados que você preencheu.</p>
               <div class="budget-bar" role="progressbar" aria-label="Parte da renda comprometida pelos valores informados" aria-valuemin="0" aria-valuemax="100" aria-valuenow="87"><div class="budget-bar-fill" id="budget-bar-fill"></div></div>
-              <div class="budget-breakdown">
-                <div class="budget-line"><span>Renda</span><strong class="money-value" id="budget-line-income">R$ 4.200,00</strong></div>
-                <div class="budget-line"><span>Essenciais</span><strong class="money-value" id="budget-line-essentials">R$ 2.300,00</strong></div>
-                <div class="budget-line"><span>Dívidas e acordos</span><strong class="money-value" id="budget-line-debts">R$ 550,00</strong></div>
-                <div class="budget-line"><span>Outros gastos</span><strong class="money-value" id="budget-line-variable">R$ 500,00</strong></div>
-                <div class="budget-line"><span>Reserva desejada</span><strong class="money-value" id="budget-line-reserve">R$ 300,00</strong></div>
-              </div>
+              <div class="budget-breakdown" id="budget-breakdown"></div>
             </section>
           </div>
           <div class="quote"><div class="quote-mark">♡</div><div><p>Você pode ajustar esses números sem culpa. Um bom plano é aquele que respeita sua realidade e pode ser revisto quando ela mudar.</p><strong>Virada · sem julgamento</strong></div></div>
@@ -608,6 +615,12 @@
       { name: "Conta exemplo C", kind: "Crediário", amount: 1080, due: "2026-11-25", icon: "C", tone: "" }
     ];
     const demoDebts = debtData.map(item => ({ ...item }));
+    const demoBudgetItems = [
+      { name: "Moradia, contas e alimentação", amount: "2.300" },
+      { name: "Parcelas e acordos", amount: "550" },
+      { name: "Transporte e outros gastos", amount: "500" }
+    ];
+    let budgetItems = demoBudgetItems.map(item => ({ ...item }));
     const money = value => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 2 }).format(value);
     const escapeHTML = value => String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
     const iconTone = tone => tone ? ` ${tone}` : "";
@@ -730,25 +743,24 @@
     function updateBudget() {
       const readAmount = id => parseBRL(document.getElementById(id).value);
       const income = readAmount("budget-income");
-      const essentials = readAmount("budget-essentials");
-      const debts = readAmount("budget-debts");
-      const variable = readAmount("budget-variable");
       const reserve = readAmount("budget-reserve");
-      const values = [income, essentials, debts, variable, reserve];
+      const amounts = budgetItems.map(item => parseBRL(item.amount));
+      const values = [income, reserve, ...amounts];
       const balance = document.getElementById("budget-balance");
       const message = document.getElementById("budget-message");
       const progress = document.querySelector(".budget-result .budget-bar");
       const fill = document.getElementById("budget-bar-fill");
 
-      if (values.some(value => !Number.isFinite(value) || value < 0)) {
+      if (values.some(value => !Number.isFinite(value) || value < 0) ||
+          budgetItems.some(item => !item.name.trim())) {
         balance.textContent = "Confira os valores";
-        message.textContent = "Informe valores iguais ou maiores que zero, usando vírgula para centavos.";
+        message.textContent = "Informe nomes para as categorias e valores iguais ou maiores que zero, usando vírgula para centavos.";
         progress.setAttribute("aria-valuenow", "0");
         fill.style.width = "0%";
         return;
       }
 
-      const spent = essentials + debts + variable + reserve;
+      const spent = amounts.reduce((sum, amount) => sum + amount, 0) + reserve;
       const remaining = income - spent;
       const committedPercent = income > 0 ? Math.min(100, Math.round(spent / income * 100)) : 0;
       balance.textContent = money(remaining);
@@ -758,15 +770,35 @@
         : "Estimativa simples com base apenas nos dados que você preencheu.";
       progress.setAttribute("aria-valuenow", String(committedPercent));
       fill.style.width = `${committedPercent}%`;
-      document.getElementById("budget-line-income").textContent = money(income);
-      document.getElementById("budget-line-essentials").textContent = money(essentials);
-      document.getElementById("budget-line-debts").textContent = money(debts);
-      document.getElementById("budget-line-variable").textContent = money(variable);
-      document.getElementById("budget-line-reserve").textContent = money(reserve);
+      document.getElementById("budget-breakdown").innerHTML = [
+        `<div class="budget-line"><span>Renda</span><strong class="money-value">${money(income)}</strong></div>`,
+        ...budgetItems.map(item => `<div class="budget-line"><span>${escapeHTML(item.name || "Categoria")}</span><strong class="money-value">${money(parseBRL(item.amount))}</strong></div>`),
+        `<div class="budget-line"><span>Reserva desejada</span><strong class="money-value">${money(reserve)}</strong></div>`
+      ].join("");
+    }
+
+    function resetBudget() {
+      document.getElementById("budget-income").value = "4.200";
+      document.getElementById("budget-reserve").value = "300";
+      budgetItems = demoBudgetItems.map(item => ({ ...item }));
+      renderBudgetItems();
+      updateBudget();
+      showToast("Orçamento restaurado aos exemplos.");
+    }
+
+    function renderBudgetItems() {
+      document.getElementById("budget-items").innerHTML = budgetItems.map((item, index) => `
+        <div class="budget-item">
+          <div class="field"><label for="budget-item-name-${index}">Categoria</label><input id="budget-item-name-${index}" data-budget-name="${index}" value="${escapeHTML(item.name)}" maxlength="40" aria-label="Nome da categoria ${index + 1}"></div>
+          <div class="field"><label for="budget-item-amount-${index}">Valor (R$)</label><input id="budget-item-amount-${index}" data-budget-amount="${index}" inputmode="decimal" value="${escapeHTML(item.amount)}" aria-label="Valor da categoria ${index + 1} em reais"></div>
+          <button class="budget-item-remove" type="button" data-action="remove-budget-item" data-index="${index}" aria-label="Excluir categoria ${index + 1}">Excluir</button>
+        </div>
+      `).join("");
     }
 
     function resetTestData() {
       debtData.splice(0, debtData.length, ...demoDebts.map(item => ({ ...item })));
+      budgetItems = demoBudgetItems.map(item => ({ ...item }));
       document.getElementById("debt-form").reset();
       document.getElementById("monthly-income").value = "4.200";
       document.getElementById("essential-costs").value = "2.650";
@@ -774,10 +806,8 @@
       document.getElementById("buffer-amount").value = "500";
       document.getElementById("candidate-payment").value = "280";
       document.getElementById("budget-income").value = "4.200";
-      document.getElementById("budget-essentials").value = "2.300";
-      document.getElementById("budget-debts").value = "550";
-      document.getElementById("budget-variable").value = "500";
       document.getElementById("budget-reserve").value = "300";
+      renderBudgetItems();
       renderDebts();
       updateSimulators();
       updateBudget();
@@ -795,7 +825,7 @@
       `).join("");
       document.getElementById("all-debts").innerHTML = debtData.length
         ? debtData.map(item => `
-          <article class="debt-wide"><div class="debt-wide-main"><div class="debt-icon${iconTone(item.tone)}">${escapeHTML(item.icon)}</div><div><strong>${escapeHTML(item.name)}</strong><small>${escapeHTML(item.kind)} · vencimento ${escapeHTML(formatDue(item.due))}</small></div></div><div class="debt-wide-right"><b>${money(item.amount)}</b><button type="button" data-action="debt-info">Ver detalhes</button></div></article>
+          <article class="debt-wide"><div class="debt-wide-main"><div class="debt-icon${iconTone(item.tone)}">${escapeHTML(item.icon)}</div><div><strong>${escapeHTML(item.name)}</strong><small>${escapeHTML(item.kind)} · vencimento ${escapeHTML(formatDue(item.due))}</small></div></div><div class="debt-wide-right"><b>${money(item.amount)}</b><button type="button" data-action="debt-info">Ver detalhes</button><button type="button" data-action="remove-debt" data-index="${debtData.indexOf(item)}" aria-label="Excluir ${escapeHTML(item.name)}">Excluir</button></div></article>
         `).join("")
         : '<div class="empty-note">Nenhuma dívida registrada. Você pode adicionar uma quando quiser.</div>';
       const upcoming = debtData.filter(item => item.due).sort((a, b) => a.due.localeCompare(b.due)).slice(0, 3);
@@ -861,7 +891,24 @@
           sharePositiveMessage();
           break;
         case "reset-budget":
-          resetTestData();
+          resetBudget();
+          break;
+        case "add-budget-item":
+          budgetItems.push({ name: "Nova categoria", amount: "0" });
+          renderBudgetItems();
+          updateBudget();
+          document.getElementById(`budget-item-name-${budgetItems.length - 1}`).focus();
+          break;
+        case "remove-budget-item":
+          budgetItems.splice(Number(actionButton.dataset.index), 1);
+          renderBudgetItems();
+          updateBudget();
+          showToast("Categoria removida do orçamento.");
+          break;
+        case "remove-debt":
+          debtData.splice(Number(actionButton.dataset.index), 1);
+          renderDebts();
+          showToast("Dívida removida do seu espaço.");
           break;
         case "reset-test":
           resetTestData();
@@ -921,8 +968,15 @@
       showToast("Dívida adicionada ao seu espaço.");
     });
     document.getElementById("view-plano").addEventListener("input", updateSimulators);
-    document.getElementById("view-orcamento").addEventListener("input", updateBudget);
+    document.getElementById("view-orcamento").addEventListener("input", event => {
+      const nameIndex = event.target.dataset.budgetName;
+      const amountIndex = event.target.dataset.budgetAmount;
+      if (nameIndex !== undefined) budgetItems[Number(nameIndex)].name = event.target.value;
+      if (amountIndex !== undefined) budgetItems[Number(amountIndex)].amount = event.target.value;
+      updateBudget();
+    });
     document.getElementById("date-label").textContent = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
+    renderBudgetItems();
     renderDebts();
     updateSimulators();
     updateBudget();
