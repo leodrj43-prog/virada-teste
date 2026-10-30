@@ -385,6 +385,54 @@
       .debt-info strong { font-size: 10px; }
       .debt-balance strong { font-size: 11px; }
     }
+    body { font-size: 16px; line-height: 1.55; }
+    .brand-tag, .nav-label, .profile small, .hero-kicker, .hero-stat small, .hero-stat span,
+    .upcoming-date small, .premium-price, .premium-price b, .mobile-nav button { font-size: 12px; }
+    .support-card strong, .support-card p, .support-card button, .profile strong, .crumb, .top-note,
+    .prototype-notice p, .prototype-notice button, .eyebrow, .date-pill, .hero p, .hero-note,
+    .primary-cta, .metric-head, .metric-foot, .tool-copy strong, .tool-copy small,
+    .panel-heading p, .text-link, .debt-info span, .debt-balance span, .plan-label,
+    .progress-meta, .plan-line, .plan-line strong, .plan-button, .upcoming-row strong,
+    .upcoming-row span, .upcoming-row > b, .quote p, .quote strong, .premium-copy p,
+    .premium-copy strong, .premium-button, .footer-note, .field label, .sim-help,
+    .sim-result span, .budget-disclaimer, .budget-line, .budget-line strong, .toast,
+    .modal-head p, .cancel-button, .save-button, .empty-note, .mobile-nav button { font-size: 13px; }
+    .nav-badge, .debt-wide small, .debt-wide-right button, .step-num, .step-card h3,
+    .step-card p, .sim-reset, .sim-result strong, .sim-result span, .feedback-link,
+    .budget-categories-head h3, .budget-add, .budget-item-remove, .budget-result small,
+    .budget-result p, .budget-line, .budget-line strong, .upcoming-date small { font-size: 13px; }
+    .intro { font-size: 16px; }
+    .hero h2 { font-size: clamp(24px, 3vw, 33px); }
+    .metric-value { font-size: 25px; }
+    .panel-heading h2, .feedback-panel h2 { font-size: 18px; }
+    .debt-info strong, .upcoming-date b { font-size: 14px; }
+    .debt-balance strong { font-size: 15px; }
+    .field input, .field select, .plan-step input, .plan-step textarea { font-size: 16px; }
+    .mobile-nav button { font-size: 11px; }
+    .plan-step-list { display: grid; gap: 12px; margin-top: 18px; }
+    .plan-step { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: 12px; padding: 16px; }
+    .plan-step-check { display: flex; width: 28px; min-height: 42px; align-items: center; justify-content: center; }
+    .plan-step-check input { width: 20px; height: 20px; accent-color: var(--green); }
+    .plan-step-fields { display: grid; min-width: 0; gap: 8px; }
+    .plan-step-fields .field { margin: 0; }
+    .plan-step input, .plan-step textarea { width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid #dfe6dd; border-radius: 10px; color: var(--ink); background: white; }
+    .plan-step textarea { min-height: 76px; resize: vertical; line-height: 1.5; }
+    .plan-step-remove { min-height: 38px; padding: 0 11px; border: 1px solid #f0d7ce; border-radius: 9px; color: #9c5238; background: #fff; font-size: 13px; font-weight: 700; }
+    .plan-add { min-height: 42px; padding: 0 14px; border: 1px solid #cfe2d4; border-radius: 10px; color: var(--green-dark); background: white; font-size: 14px; font-weight: 750; }
+    .plan-progress-fill { width: 0; transition: width .2s; }
+    .plan-guidance { margin-top: 16px; padding: 14px 16px; border-radius: 12px; color: #355a3b; background: #f3f8ed; }
+    .plan-guidance strong { font-size: 14px; }
+    .plan-guidance p { margin: 4px 0 0; font-size: 13px; line-height: 1.55; }
+    @media (max-width: 760px) {
+      .intro { font-size: 15px; }
+      .tool-copy strong { font-size: 12px; }
+      .metric-head { font-size: 12px; }
+      .plan-step { gap: 8px; padding: 12px; }
+      .plan-step-check { width: 24px; }
+      .plan-step-remove { padding: 0 8px; }
+      .plan-guidance { padding: 12px; }
+      .mobile-nav button { font-size: 11px; }
+    }
   </style>
 </head>
 <body>
@@ -496,13 +544,12 @@
         <section class="view" id="view-plano" aria-labelledby="plan-title">
           <div class="page-heading"><div><div class="eyebrow">Consistência acima da pressa</div><h1 id="plan-title">Meu plano possível</h1><p class="intro">Uma organização inicial, que você pode ajustar à sua realidade.</p></div></div>
           <section class="card panel" style="margin-bottom:16px">
-            <div class="panel-heading"><div><h2>Seu mês, passo a passo</h2><p>Estimativa ilustrativa com base nos dados registrados.</p></div><span class="plan-label">NOVEMBRO</span></div>
-            <div class="progress-meta"><span>Etapas concluídas</span><strong>1 de 3</strong></div><div class="progress-track"><div class="progress-fill"></div></div>
-            <div class="steps" style="margin-top:19px">
-              <article class="card step-card"><div class="step-num">✓</div><div><h3>Mapear suas contas</h3><p>Você já reuniu as informações principais. Isso ajuda a tomar decisões com menos ansiedade.</p></div></article>
-              <article class="card step-card"><div class="step-num">2</div><div><h3>Entender os custos</h3><p>Compare taxas, encargos e o Custo Efetivo Total (CET) nos canais oficiais dos credores.</p></div></article>
-              <article class="card step-card"><div class="step-num">3</div><div><h3>Escolher uma proposta</h3><p>Antes de aceitar, confira se a parcela cabe depois de moradia, alimentação e contas essenciais.</p></div></article>
-            </div>
+            <div class="panel-heading"><div><h2>Seu plano, passo a passo</h2><p>Edite os títulos e detalhes, marque o que concluiu ou crie novas etapas. Use valores e informações fictícios neste teste.</p></div></div>
+            <div class="progress-meta"><span>Etapas concluídas</span><strong id="plan-progress-label">1 de 3</strong></div><div class="progress-track" role="progressbar" aria-label="Etapas do plano concluídas" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill plan-progress-fill" id="plan-progress-fill"></div></div>
+            <div class="plan-step-list" id="plan-step-list"></div>
+            <div style="margin-top:14px"><button class="plan-add" type="button" data-action="add-plan-step">＋ Adicionar etapa</button></div>
+            <div class="empty-note" id="plan-empty" hidden>Nenhuma etapa no plano. Adicione uma etapa para começar.</div>
+            <div class="plan-guidance"><strong>Como usar seu plano</strong><p>Registre uma ação pequena e realista por etapa. Compare juros, taxas e Custo Efetivo Total (CET) nos canais oficiais, e só considere uma proposta se a parcela couber depois das necessidades essenciais. Não aceite sob pressão.</p></div>
           </section>
           <div class="sim-grid">
             <section class="card sim-panel" aria-labelledby="affordability-title">
@@ -620,7 +667,13 @@
       { name: "Parcelas e acordos", amount: "550" },
       { name: "Transporte e outros gastos", amount: "500" }
     ];
+    const demoPlanSteps = [
+      { title: "Mapear minhas contas", detail: "Reunir os valores aproximados e as datas de vencimento, sem compartilhar dados pessoais.", done: true },
+      { title: "Entender os custos", detail: "Conferir juros, taxas e Custo Efetivo Total (CET) nos canais oficiais dos credores.", done: false },
+      { title: "Avaliar uma proposta", detail: "Verificar se a parcela cabe no orçamento depois das despesas essenciais.", done: false }
+    ];
     let budgetItems = demoBudgetItems.map(item => ({ ...item }));
+    let planSteps = demoPlanSteps.map(item => ({ ...item }));
     const money = value => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 2 }).format(value);
     const escapeHTML = value => String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
     const iconTone = tone => tone ? ` ${tone}` : "";
@@ -799,6 +852,7 @@
     function resetTestData() {
       debtData.splice(0, debtData.length, ...demoDebts.map(item => ({ ...item })));
       budgetItems = demoBudgetItems.map(item => ({ ...item }));
+      planSteps = demoPlanSteps.map(item => ({ ...item }));
       document.getElementById("debt-form").reset();
       document.getElementById("monthly-income").value = "4.200";
       document.getElementById("essential-costs").value = "2.650";
@@ -808,10 +862,38 @@
       document.getElementById("budget-income").value = "4.200";
       document.getElementById("budget-reserve").value = "300";
       renderBudgetItems();
+      renderPlanSteps();
       renderDebts();
       updateSimulators();
       updateBudget();
       showToast("Alterações descartadas. Exemplos de demonstração restaurados.");
+    }
+
+    function updatePlanProgress() {
+      const completed = planSteps.filter(step => step.done).length;
+      const percentage = planSteps.length ? Math.round(completed / planSteps.length * 100) : 0;
+      document.getElementById("plan-progress-label").textContent = `${completed} de ${planSteps.length}`;
+      const progress = document.querySelector("#view-plano .progress-track");
+      progress.setAttribute("aria-valuenow", String(percentage));
+      document.getElementById("plan-progress-fill").style.width = `${percentage}%`;
+    }
+
+    function renderPlanSteps() {
+      const list = document.getElementById("plan-step-list");
+      list.innerHTML = planSteps.map((step, index) => `
+        <article class="card plan-step">
+          <label class="plan-step-check" for="plan-step-done-${index}">
+            <input id="plan-step-done-${index}" type="checkbox" data-plan-done="${index}" ${step.done ? "checked" : ""} aria-label="Marcar etapa ${index + 1} como concluída">
+          </label>
+          <div class="plan-step-fields">
+            <div class="field"><label for="plan-step-title-${index}">Etapa ${index + 1} · título</label><input id="plan-step-title-${index}" data-plan-title="${index}" value="${escapeHTML(step.title)}" maxlength="80"></div>
+            <div class="field"><label for="plan-step-detail-${index}">Detalhes e próximo passo</label><textarea id="plan-step-detail-${index}" data-plan-detail="${index}" maxlength="240">${escapeHTML(step.detail)}</textarea></div>
+          </div>
+          <button class="plan-step-remove" type="button" data-action="remove-plan-step" data-index="${index}" aria-label="Excluir etapa ${index + 1}">Excluir</button>
+        </article>
+      `).join("");
+      document.getElementById("plan-empty").hidden = planSteps.length > 0;
+      updatePlanProgress();
     }
 
     function renderDebts() {
@@ -905,6 +987,16 @@
           updateBudget();
           showToast("Categoria removida do orçamento.");
           break;
+        case "add-plan-step":
+          planSteps.push({ title: "Nova etapa", detail: "", done: false });
+          renderPlanSteps();
+          document.getElementById(`plan-step-title-${planSteps.length - 1}`).focus();
+          break;
+        case "remove-plan-step":
+          planSteps.splice(Number(actionButton.dataset.index), 1);
+          renderPlanSteps();
+          showToast("Etapa removida do plano.");
+          break;
         case "remove-debt":
           debtData.splice(Number(actionButton.dataset.index), 1);
           renderDebts();
@@ -967,7 +1059,16 @@
       setView("dividas");
       showToast("Dívida adicionada ao seu espaço.");
     });
-    document.getElementById("view-plano").addEventListener("input", updateSimulators);
+    document.getElementById("view-plano").addEventListener("input", event => {
+      const titleIndex = event.target.dataset.planTitle;
+      const detailIndex = event.target.dataset.planDetail;
+      const doneIndex = event.target.dataset.planDone;
+      if (titleIndex !== undefined) planSteps[Number(titleIndex)].title = event.target.value;
+      if (detailIndex !== undefined) planSteps[Number(detailIndex)].detail = event.target.value;
+      if (doneIndex !== undefined) planSteps[Number(doneIndex)].done = event.target.checked;
+      if (titleIndex !== undefined || detailIndex !== undefined || doneIndex !== undefined) updatePlanProgress();
+      updateSimulators();
+    });
     document.getElementById("view-orcamento").addEventListener("input", event => {
       const nameIndex = event.target.dataset.budgetName;
       const amountIndex = event.target.dataset.budgetAmount;
@@ -977,6 +1078,7 @@
     });
     document.getElementById("date-label").textContent = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
     renderBudgetItems();
+    renderPlanSteps();
     renderDebts();
     updateSimulators();
     updateBudget();
