@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7f2">
+  <meta name="description" content="Virada: organize suas contas, entenda suas dívidas e avance no seu ritmo.">
+  <title>Virada — Seu próximo passo financeiro</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17251f;
+      --muted: #718078;
+      --line: #e7ebe4;
+      --paper: #fff;
+      --canvas: #f6f7f2;
+      --green: #167b56;
+      --green-dark: #105b40;
+      --green-soft: #e8f4ec;
+      --lime: #d3ef83;
+      --coral: #e88564;
+      --coral-soft: #fff0e9;
+      --blue: #547e93;
+      --shadow: 0 8px 26px rgba(27, 49, 37, .055);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 14px/1.5 Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid #9dcf9d;
+      outline-offset: 2px;
+    }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 4;
+      display: flex;
+      width: 244px;
+      flex-direction: column;
+      padding: 26px 17px 18px;
+      border-right: 1px solid var(--line);
+      background: #fff;
+    }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 0 10px 38px; }
+    .brand-mark {
+      display: grid;
+      width: 40px;
+      height: 40px;
+      place-items: center;
+      border-radius: 14px;
+      color: #173d2b;
+      background: var(--lime);
+    }
+    .brand-mark svg { width: 23px; height: 23px; }
+    .brand-name { font-size: 19px; font-weight: 800; letter-spacing: -.8px; }
+    .brand-tag { color: var(--muted); font-size: 10px; letter-spacing: .15px; }
+    .nav-label { margin: 0 11px 9px; color: #9aa59e; font-size: 10px; font-weight: 750; letter-spacing: 1.15px; text-transform: uppercase; }
+    .nav { display: grid; gap: 5px; }
+    .nav button {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      min-height: 44px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 12px;
+      color: #66756d;
+      background: transparent;
+      text-align: left;
+      transition: background .16s, color .16s;
+    }
+    .nav button:hover, .nav button.active { color: var(--green-dark); background: var(--green-soft); }
+    .nav button.active { font-weight: 700; }
+    .nav svg { width: 18px; height: 18px; flex: 0 0 auto; }
+    .nav-badge { margin-left: auto; padding: 2px 7px; border-radius: 99px; color: #965335; background: var(--coral-soft); font-size: 10px; font-weight: 750; }
+    .sidebar-bottom { margin-top: auto; }
+    .support-card { margin: 14px 3px 17px; padding: 15px; border: 1px solid var(--line); border-radius: 15px; background: #fbfcf8; }
+    .support-card strong { display: block; margin-bottom: 4px; font-size: 12px; }
+    .support-card p { margin: 0 0 9px; color: var(--muted); font-size: 11px; }
+    .support-card button { padding: 0; border: 0; color: var(--green); background: none; font-size: 11px; font-weight: 750; }
+    .profile { display: flex; align-items: center; gap: 10px; padding: 15px 7px 0; border-top: 1px solid var(--line); }
+    .avatar { display: grid; width: 37px; height: 37px; place-items: center; border-radius: 50%; color: #754d38; background: #f3dfd1; font-weight: 800; }
+    .profile strong { display: block; font-size: 12px; }
+    .profile small { color: var(--muted); font-size: 10px; }
+    main { width: calc(100% - 244px); min-width: 0; margin-left: 244px; }
+    .topbar {
+      display: flex;
+      height: 70px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(22px, 4vw, 58px);
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.82);
+    }
+    .crumb { color: var(--muted); font-size: 12px; }
+    .crumb b { color: var(--ink); font-weight: 650; }
+    .top-right { display: flex; align-items: center; gap: 11px; }
+    .top-note { color: var(--muted); font-size: 11px; }
+    .top-note b { color: var(--green); }
+    .icon-button { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid var(--line); border-radius: 12px; color: #63726a; background: white; }
+    .icon-button svg { width: 17px; height: 17px; }
+    .content { width: min(1190px, 100%); margin: 0 auto; padding: 35px clamp(22px, 4vw, 58px) 48px; }
+    .prototype-notice { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; padding: 12px 15px; border: 1px solid #e8dfc7; border-radius: 13px; background: #fffaf0; }
+    .prototype-notice p { margin: 0; color: #705d39; font-size: 10px; line-height: 1.55; }
+    .prototype-notice strong { color: #5b4829; }
+    .prototype-notice button { flex: 0 0 auto; padding: 7px 10px; border: 1px solid #e6d9bb; border-radius: 9px; color: #765e32; background: #fff; font-size: 9px; font-weight: 750; }
+    .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 24px; }
+    .eyebrow { margin-bottom: 6px; color: var(--green); font-size: 10px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(25px, 3vw, 33px); font-weight: 760; letter-spacing: -1.2px; line-height: 1.15; }
+    .intro { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+    .date-pill { padding: 9px 12px; border: 1px solid var(--line); border-radius: 11px; color: #66756d; background: white; font-size: 11px; white-space: nowrap; }
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.32fr) minmax(210px, .68fr);
+      gap: 22px;
+      overflow: hidden;
+      margin-bottom: 19px;
+      padding: 27px 29px;
+      border-radius: 22px;
+      color: #fff;
+      background: #176345;
+      box-shadow: 0 12px 30px rgba(27, 86, 59, .14);
+    }
+    .hero:after { position: absolute; top: -115px; right: 180px; width: 290px; height: 290px; border: 1px solid rgba(255,255,255,.09); border-radius: 50%; content: ""; }
+    .hero-copy { position: relative; z-index: 1; }
+    .hero-kicker { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; color: #d8f2d4; font-size: 10px; font-weight: 750; letter-spacing: 1px; text-transform: uppercase; }
+    .hero-kicker span { width: 7px; height: 7px; border-radius: 50%; background: var(--lime); }
+    .hero h2 { max-width: 500px; margin: 0; font-size: clamp(22px, 3vw, 31px); letter-spacing: -.8px; line-height: 1.17; }
+    .hero p { max-width: 470px; margin: 10px 0 19px; color: #d5e9dd; font-size: 12px; }
+    .primary-cta { min-height: 42px; padding: 0 16px; border: 0; border-radius: 12px; color: #183527; background: var(--lime); font-size: 12px; font-weight: 800; transition: transform .15s, background .15s; }
+    .primary-cta:hover { transform: translateY(-1px); background: #e0f6a0; }
+    .hero-note { display: inline-flex; align-items: center; gap: 6px; margin-left: 11px; color: #d5e9dd; font-size: 10px; }
+    .hero-stat { position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: center; padding: 18px 22px; border: 1px solid rgba(255,255,255,.16); border-radius: 17px; background: rgba(7, 57, 37, .2); }
+    .hero-stat small { color: #c4dfce; font-size: 10px; }
+    .hero-stat strong { margin: 4px 0; color: var(--lime); font-size: 29px; letter-spacing: -1px; }
+    .hero-stat span { color: #d5e9dd; font-size: 10px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 19px; }
+    .card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); box-shadow: var(--shadow); }
+    .metric { min-height: 126px; padding: 17px 19px; }
+    .metric-head { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 11px; }
+    .metric-icon { display: grid; width: 31px; height: 31px; place-items: center; border-radius: 10px; }
+    .metric-icon svg { width: 16px; height: 16px; }
+    .metric-icon.green { color: var(--green); background: var(--green-soft); }
+    .metric-icon.coral { color: #b36143; background: var(--coral-soft); }
+    .metric-icon.blue { color: var(--blue); background: #eaf1f4; }
+    .metric-value { margin: 9px 0 3px; font-size: 23px; font-weight: 760; letter-spacing: -.8px; }
+    .metric-foot { color: var(--muted); font-size: 10px; }
+    .metric-foot b { color: var(--green); }
+    .quick-tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: -2px 0 19px; }
+    .tool-card { display: flex; min-height: 77px; align-items: center; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 15px; color: var(--ink); background: white; text-align: left; box-shadow: var(--shadow); transition: transform .15s, border-color .15s; }
+    .tool-card:hover { transform: translateY(-2px); border-color: #b8d5bf; }
+    .tool-icon { display: grid; width: 37px; height: 37px; flex: 0 0 auto; place-items: center; border-radius: 12px; color: var(--green); background: var(--green-soft); }
+    .tool-icon svg { width: 18px; height: 18px; }
+    .tool-copy { min-width: 0; }
+    .tool-copy strong { display: block; font-size: 11px; }
+    .tool-copy small { color: var(--muted); font-size: 9px; }
+    .tool-arrow { margin-left: auto; color: #95a29a; font-size: 16px; }
+    .dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(270px, .8fr); gap: 17px; align-items: start; }
+    .panel { padding: 21px; }
+    .panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+    .panel-heading h2 { margin: 0; font-size: 15px; letter-spacing: -.25px; }
+    .panel-heading p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+    .text-link { padding: 3px 0; border: 0; color: var(--green); background: transparent; font-size: 10px; font-weight: 750; white-space: nowrap; }
+    .debt-list { display: grid; gap: 10px; }
+    .debt-row { display: grid; grid-template-columns: 39px minmax(0, 1fr) auto; align-items: center; gap: 11px; padding: 11px 12px; border: 1px solid #edf0ea; border-radius: 13px; }
+    .debt-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 12px; color: var(--green-dark); background: #edf5e6; font-size: 14px; font-weight: 800; }
+    .debt-icon.orange { color: #a45b3e; background: #fff0e9; }
+    .debt-icon.blue { color: #4a7589; background: #eaf1f4; }
+    .debt-info strong { display: block; font-size: 11px; }
+    .debt-info span { color: var(--muted); font-size: 9px; }
+    .debt-balance { text-align: right; }
+    .debt-balance strong { display: block; font-size: 12px; }
+    .debt-balance span { color: var(--muted); font-size: 9px; }
+    .plan-card { overflow: hidden; }
+    .plan-top { padding: 21px 21px 17px; background: #f5f8ee; }
+    .plan-top .panel-heading { margin-bottom: 13px; }
+    .plan-label { padding: 4px 8px; border-radius: 99px; color: #5b733c; background: #e5efce; font-size: 9px; font-weight: 750; }
+    .progress-meta { display: flex; justify-content: space-between; margin-bottom: 7px; color: #607066; font-size: 10px; }
+    .progress-track { height: 8px; overflow: hidden; border-radius: 99px; background: #e3e8da; }
+    .progress-fill { width: 32%; height: 100%; border-radius: inherit; background: var(--green); }
+    .plan-detail { padding: 17px 21px 20px; }
+    .plan-line { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; color: var(--muted); font-size: 10px; }
+    .plan-line strong { color: var(--ink); font-size: 10px; }
+    .plan-button { width: 100%; min-height: 39px; margin-top: 5px; border: 1px solid #dfe8df; border-radius: 11px; color: var(--green-dark); background: white; font-size: 10px; font-weight: 750; }
+    .upcoming-list { display: grid; gap: 9px; }
+    .upcoming-row { display: grid; grid-template-columns: 39px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid #f0f2ed; }
+    .upcoming-date { display: grid; width: 36px; height: 39px; align-content: center; justify-items: center; border-radius: 10px; color: var(--green-dark); background: var(--green-soft); }
+    .upcoming-date b { font-size: 13px; line-height: 1.1; }
+    .upcoming-date small { font-size: 8px; text-transform: uppercase; }
+    .upcoming-row strong { display: block; font-size: 10px; }
+    .upcoming-row span { color: var(--muted); font-size: 9px; }
+    .upcoming-row > b { font-size: 10px; }
+    .quote { display: flex; align-items: flex-start; gap: 11px; margin-top: 16px; padding: 14px; border-radius: 14px; background: #fff8f1; }
+    .quote-mark { color: var(--coral); font-size: 25px; font-weight: 850; line-height: .9; }
+    .quote p { margin: 0; color: #735a4d; font-size: 10px; }
+    .quote strong { display: block; margin-top: 5px; color: #8a6049; font-size: 9px; }
+    .premium-banner { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 16px; padding: 18px 21px; border: 1px solid #e7e8d7; border-radius: 17px; background: #f0f3df; }
+    .premium-copy { display: flex; align-items: flex-start; gap: 12px; }
+    .premium-mark { display: grid; width: 35px; height: 35px; flex: 0 0 auto; place-items: center; border-radius: 11px; color: #586d2d; background: #dce8b3; font-size: 16px; font-weight: 850; }
+    .premium-copy strong { display: block; margin-bottom: 3px; font-size: 12px; }
+    .premium-copy p { margin: 0; color: #637052; font-size: 10px; }
+    .premium-action { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+    .premium-price { color: #687458; font-size: 9px; text-align: right; }
+    .premium-price b { display: block; color: #3c5427; font-size: 13px; }
+    .premium-button { min-height: 37px; padding: 0 12px; border: 1px solid #cbd6a7; border-radius: 10px; color: #465e2b; background: #fff; font-size: 10px; font-weight: 750; }
+    .footer-note { margin: 16px 3px 0; color: #8a968e; font-size: 9px; line-height: 1.6; }
+    .view { display: none; }
+    .view.active { display: block; animation: appear .18s ease-out; }
+    @keyframes appear { from { opacity: .5; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+    .all-debts { display: grid; gap: 11px; }
+    .debt-wide { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: white; }
+    .debt-wide-main { display: flex; align-items: center; gap: 12px; }
+    .debt-wide strong { display: block; font-size: 12px; }
+    .debt-wide small { color: var(--muted); font-size: 10px; }
+    .debt-wide-right { text-align: right; }
+    .debt-wide-right b { display: block; font-size: 13px; }
+    .debt-wide-right button { margin-top: 5px; padding: 0; border: 0; color: var(--green); background: none; font-size: 10px; font-weight: 750; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
+    .step-card { padding: 17px; }
+    .step-num { display: grid; width: 28px; height: 28px; margin-bottom: 12px; place-items: center; border-radius: 9px; color: var(--green-dark); background: var(--green-soft); font-size: 11px; font-weight: 800; }
+    .step-card h3 { margin: 0 0 6px; font-size: 12px; }
+    .step-card p { margin: 0; color: var(--muted); font-size: 10px; }
+    .empty-note { padding: 19px; border: 1px dashed #d4dfd4; border-radius: 14px; color: var(--muted); background: #fbfcf8; font-size: 11px; }
+    .sim-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+    .sim-panel { padding: 19px; }
+    .sim-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
+    .sim-panel .field { margin: 7px 0 10px; }
+    .sim-panel .field input { height: 40px; }
+    .sim-help { margin: 2px 0 12px; color: var(--muted); font-size: 9px; line-height: 1.5; }
+    .sim-result { min-height: 72px; padding: 13px; border: 1px solid #dfead8; border-radius: 12px; color: #355a3b; background: #f3f8ed; }
+    .sim-result.warning { border-color: #f0dfc8; color: #805332; background: #fff8ee; }
+    .sim-result strong { display: block; margin-bottom: 3px; font-size: 11px; }
+    .sim-result span { display: block; font-size: 10px; line-height: 1.5; }
+    .sim-result[aria-live] { transition: background .15s, border-color .15s; }
+    .sim-reset { padding: 0; border: 0; color: var(--green); background: transparent; font-size: 10px; font-weight: 750; }
+    .feedback-link { display: inline-flex; min-height: 38px; align-items: center; justify-content: center; padding: 0 14px; border: 1px solid #cfe2d4; border-radius: 10px; color: var(--green-dark); background: #fff; font-size: 11px; font-weight: 750; text-decoration: none; }
+    .feedback-panel { margin-top: 20px; padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); scroll-margin-top: 18px; }
+    .feedback-panel h2 { margin: 0; font-size: 20px; letter-spacing: -.5px; }
+    .feedback-panel > p { margin: 7px 0 15px; color: var(--muted); font-size: 11px; }
+    .feedback-form { display: block; width: 100%; min-height: 1100px; border: 0; border-radius: 12px; background: var(--canvas); }
+    .feedback-privacy { margin: 10px 0 0 !important; font-size: 10px !important; }
+    .budget-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr); gap: 15px; align-items: start; }
+    .budget-panel { padding: 20px; }
+    .budget-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
+    .budget-result { padding: 17px; border-radius: 15px; color: #fff; background: #176345; }
+    .budget-result small { color: #d3e6da; font-size: 10px; }
+    .budget-result strong { display: block; margin: 3px 0 9px; color: var(--lime); font-size: 28px; letter-spacing: -.8px; }
+    .budget-result strong.warning { color: #ffd1bd; }
+    .budget-result p { margin: 0; color: #d3e6da; font-size: 10px; }
+    .budget-bar { height: 9px; overflow: hidden; margin-top: 15px; border-radius: 99px; background: rgba(255,255,255,.2); }
+    .budget-bar-fill { width: 50%; height: 100%; border-radius: inherit; background: var(--lime); transition: width .2s; }
+    .budget-breakdown { display: grid; gap: 9px; margin-top: 15px; }
+    .budget-line { display: flex; justify-content: space-between; gap: 9px; color: #e2eee6; font-size: 10px; }
+    .budget-line strong { margin: 0; color: white; font-size: 10px; letter-spacing: 0; }
+    .budget-disclaimer { margin: 13px 0 0; color: var(--muted); font-size: 9px; line-height: 1.55; }
+    .privacy-mode .money-value,
+    .privacy-mode .debt-balance strong,
+    .privacy-mode .hero-stat strong,
+    .privacy-mode .plan-line strong,
+    .privacy-mode .upcoming-row > b,
+    .privacy-mode .sim-result,
+    .privacy-mode .budget-result strong,
+    .privacy-mode .budget-line strong { filter: blur(7px); user-select: none; }
+    .mobile-nav { display: none; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 10; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(18, 35, 27, .45); }
+    .modal-backdrop.open { display: flex; }
+    .modal { width: min(440px, 100%); padding: 24px; border-radius: 20px; background: white; box-shadow: 0 24px 80px rgba(10,30,18,.24); }
+    .modal-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 17px; }
+    .modal-head h2 { margin: 0; font-size: 20px; letter-spacing: -.5px; }
+    .modal-head p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
+    .close-button { width: 31px; height: 31px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); background: #fff; font-size: 18px; line-height: 1; }
+    .field { display: grid; gap: 5px; margin: 12px 0; }
+    .field label { color: #4d5e54; font-size: 10px; font-weight: 700; }
+    .field input, .field select { width: 100%; height: 42px; padding: 0 11px; border: 1px solid #dfe6dd; border-radius: 10px; color: var(--ink); background: white; font-size: 12px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .modal-actions { display: flex; gap: 9px; margin-top: 17px; }
+    .modal-actions button { min-height: 42px; flex: 1; border-radius: 11px; font-size: 11px; font-weight: 750; }
+    .cancel-button { border: 1px solid var(--line); color: var(--muted); background: white; }
+    .save-button { border: 0; color: white; background: var(--green); }
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 20; max-width: min(380px, calc(100vw - 32px)); padding: 13px 16px; border-radius: 13px; color: white; background: #173f2d; box-shadow: var(--shadow); font-size: 11px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .2s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1050px) {
+      .sidebar { width: 218px; }
+      main { width: calc(100% - 218px); margin-left: 218px; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .budget-layout { grid-template-columns: 1fr; }
+      .plan-card { display: grid; grid-template-columns: 1fr 1fr; }
+      .plan-top { border-right: 1px solid var(--line); }
+      .plan-detail { align-self: center; }
+    }
+    @media (max-width: 760px) {
+      body { padding-bottom: 72px; }
+      .sidebar { display: none; }
+      main { width: 100%; margin-left: 0; }
+      .topbar { height: 57px; padding: 0 18px; }
+      .crumb { font-size: 11px; }
+      .top-note { display: none; }
+      .content { padding: 25px 17px 30px; }
+      .prototype-notice { align-items: flex-start; flex-direction: column; gap: 9px; padding: 12px; }
+      .page-heading { align-items: flex-start; margin-bottom: 19px; }
+      h1 { font-size: 26px; }
+      .intro { max-width: 300px; font-size: 11px; }
+      .date-pill { display: none; }
+      .hero { grid-template-columns: 1fr; gap: 17px; padding: 22px; border-radius: 19px; }
+      .hero:after { right: -100px; }
+      .hero h2 { max-width: 350px; font-size: 25px; }
+      .hero p { margin: 8px 0 15px; }
+      .hero-stat { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 12px 15px; }
+      .hero-stat small, .hero-stat span { grid-column: 1; }
+      .hero-stat strong { grid-column: 2; grid-row: 1 / span 2; margin: 0; font-size: 24px; }
+      .hero-note { display: flex; margin: 10px 0 0; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-bottom: 14px; }
+      .quick-tools { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin-bottom: 14px; }
+      .tool-card { min-height: 82px; flex-direction: column; align-items: flex-start; gap: 7px; padding: 10px; }
+      .tool-icon { width: 31px; height: 31px; border-radius: 10px; }
+      .tool-icon svg { width: 16px; height: 16px; }
+      .tool-copy strong { font-size: 9px; }
+      .tool-copy small, .tool-arrow { display: none; }
+      .metric { min-height: 111px; padding: 13px; }
+      .metric:last-child { grid-column: 1 / -1; min-height: auto; }
+      .metric-value { font-size: 20px; }
+      .metric-head { font-size: 10px; }
+      .dashboard-grid { gap: 13px; }
+      .panel { padding: 16px; }
+      .plan-card { display: block; }
+      .plan-top { border-right: 0; border-bottom: 1px solid var(--line); padding: 17px; }
+      .plan-detail { padding: 15px 17px 17px; }
+      .budget-panel { padding: 16px; }
+      .budget-fields { grid-template-columns: 1fr; }
+      .premium-banner { align-items: flex-start; flex-direction: column; gap: 13px; padding: 16px; }
+      .premium-action { width: 100%; justify-content: space-between; }
+      .feedback-panel { padding: 15px; }
+      .feedback-form { min-height: 1350px; }
+      .sim-grid { grid-template-columns: 1fr; gap: 12px; }
+      .steps { grid-template-columns: 1fr; }
+      .step-card { display: flex; align-items: flex-start; gap: 12px; padding: 14px; }
+      .step-num { flex: 0 0 auto; margin: 0; }
+      .mobile-nav {
+        position: fixed;
+        inset: auto 0 0;
+        z-index: 5;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        padding: 7px 8px max(8px, env(safe-area-inset-bottom));
+        border-top: 1px solid var(--line);
+        background: rgba(255,255,255,.96);
+        backdrop-filter: blur(12px);
+      }
+      .mobile-nav button { display: grid; justify-items: center; gap: 3px; padding: 3px 1px; border: 0; color: #77847c; background: none; font-size: 8px; }
+      .mobile-nav button.active { color: var(--green); font-weight: 750; }
+      .mobile-nav svg { width: 19px; height: 19px; }
+      .toast { right: 12px; bottom: 85px; }
+    }
+    @media (max-width: 390px) {
+      .hero { padding: 19px; }
+      .hero h2 { font-size: 22px; }
+      .hero-note { font-size: 9px; }
+      .sim-fields { grid-template-columns: 1fr; }
+      .debt-row { grid-template-columns: 34px minmax(0,1fr) auto; gap: 8px; padding: 10px 9px; }
+      .debt-icon { width: 34px; height: 34px; }
+      .debt-info strong { font-size: 10px; }
+      .debt-balance strong { font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Navegação principal">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 15.5 10 10l3.2 3.2L20 6.5M14.5 6.5H20V12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div><div class="brand-name">virada</div><div class="brand-tag">um passo de cada vez</div></div>
+      </div>
+      <div class="nav-label">Seu espaço</div>
+      <nav class="nav">
+        <button class="active" data-view="inicio"><svg viewBox="0 0 24 24" fill="none"><path d="m4 10 8-6 8 6v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Visão geral</button>
+        <button data-view="dividas"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="14" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M4 9h16M8 14h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Minhas dívidas<span class="nav-badge" id="debt-count">3</span></button>
+        <button data-view="plano"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19V5m0 14h15M8 15l3-4 3 2 5-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Meu plano</button>
+        <button data-view="orcamento"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16M8 4v4m8 2v4m-5 2v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Orçamento</button>
+        <button data-view="conteudos"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4.5h11.5A2.5 2.5 0 0 1 19 7v13H7a2 2 0 0 1-2-2V4.5Z" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 9h7M8.5 12h7M8.5 15h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Aprender</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="support-card"><strong>Precisa conversar?</strong><p>Você não precisa organizar tudo de uma vez.</p><button data-action="support">Ver apoio gratuito →</button></div>
+        <div class="profile"><div class="avatar">MA</div><div><strong>Marina Alves</strong><small>Meu espaço financeiro</small></div></div>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div class="crumb">Meu espaço <span aria-hidden="true">/</span> <b id="crumb-current">Visão geral</b></div>
+        <div class="top-right"><span class="top-note"><b>Seus dados são seus.</b> Privacidade em primeiro lugar.</span><button class="icon-button" aria-label="Ocultar valores na tela (apenas visual)" aria-pressed="false" title="Ocultar valores visualmente nesta tela" data-action="privacy"><svg viewBox="0 0 24 24" fill="none"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg></button><button class="icon-button" aria-label="Notificações" data-action="notifications"><svg viewBox="0 0 24 24" fill="none"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      </header>
+
+      <div class="content">
+        <aside class="prototype-notice" aria-label="Aviso sobre os dados do protótipo">
+          <p><strong>Protótipo de teste:</strong> use valores fictícios. O que você digitar aqui fica somente enquanto esta página estiver aberta; não é salvo nem enviado. Fechar ou atualizar a página descarta as alterações. Para compartilhar sua opinião, use o formulário ao final da página.</p>
+          <button type="button" data-action="reset-test">Restaurar exemplos e apagar alterações</button>
+        </aside>
+        <p><a class="feedback-link" href="#feedback">Avaliar o protótipo ↓</a></p>
+        <section class="view active" id="view-inicio" aria-labelledby="page-title">
+          <div class="page-heading">
+            <div><div class="eyebrow" id="date-label">Seu resumo financeiro</div><h1 id="page-title">Bom dia, Marina <span aria-hidden="true">👋</span></h1><p class="intro">O importante não é resolver tudo hoje. É saber qual é o próximo passo.</p></div>
+            <div class="date-pill">Seu resumo · outubro</div>
+          </div>
+
+          <section class="hero" aria-label="Seu progresso financeiro">
+            <div class="hero-copy">
+              <div class="hero-kicker"><span></span> Seu progresso está acontecendo</div>
+              <h2>Você já deu o passo mais importante: começou.</h2>
+              <p>Com um plano que cabe na sua realidade, cada escolha pode te aproximar de mais tranquilidade.</p>
+              <button class="primary-cta" data-view-link="plano">Ver meu próximo passo <span aria-hidden="true">→</span></button>
+              <span class="hero-note">✓ Sem julgamentos. No seu ritmo.</span>
+            </div>
+            <div class="hero-stat"><small>Você já reduziu</small><strong>R$ 1.240</strong><span>do total das suas dívidas</span></div>
+          </section>
+
+          <section class="metrics" aria-label="Resumo">
+            <article class="card metric"><div class="metric-head">Total em dívidas<span class="metric-icon coral"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18m5-13c0-1.7-1.8-3-5-3S7 6.3 7 8s1.5 2.5 5 3 5 1.3 5 3-1.8 3-5 3-5-1.3-5-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div><div class="metric-value money-value" id="total-debt">R$ 8.760</div><div class="metric-foot">Organizadas em <b id="metric-debt-count">3 contas</b></div></article>
+            <article class="card metric"><div class="metric-head">Próxima parcela<span class="metric-icon blue"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 3v4m8-4v4M4 9h16m-11 4h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span></div><div class="metric-value">R$ 280</div><div class="metric-foot">Cartão Nubank · vence dia 12</div></article>
+            <article class="card metric"><div class="metric-head">Reserva de emergência<span class="metric-icon green"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18m6-14H9a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div><div class="metric-value">R$ 450</div><div class="metric-foot">Pequenos passos também contam</div></article>
+          </section>
+
+          <section class="quick-tools" aria-label="Ações rápidas">
+            <button class="tool-card" data-view-link="orcamento"><span class="tool-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16M8 4v4m8 2v4m-5 2v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span class="tool-copy"><strong>Planejar meu mês</strong><small>Veja como dividir a renda</small></span><span class="tool-arrow">→</span></button>
+            <button class="tool-card" data-view-link="plano" data-focus-target="offer-a-entry"><span class="tool-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h14M8 4v4m8 2v4m-4 2v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span class="tool-copy"><strong>Comparar propostas</strong><small>Some entrada e parcelas</small></span><span class="tool-arrow">→</span></button>
+            <button class="tool-card" data-action="share"><span class="tool-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="2.5" stroke="currentColor" stroke-width="1.7"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="1.7"/><circle cx="18" cy="19" r="2.5" stroke="currentColor" stroke-width="1.7"/><path d="m8.2 10.8 7.6-4.6m-7.6 7 7.6 4.6" stroke="currentColor" stroke-width="1.7"/></svg></span><span class="tool-copy"><strong>Convidar alguém</strong><small>Compartilhe um incentivo</small></span><span class="tool-arrow">→</span></button>
+          </section>
+
+          <div class="dashboard-grid">
+            <section class="card panel">
+              <div class="panel-heading"><div><h2>Suas dívidas, sem complicação</h2><p>Um retrato claro para decidir com mais segurança.</p></div><button class="text-link" data-view-link="dividas">Ver todas →</button></div>
+              <div class="debt-list" id="debt-list">
+                <div class="debt-row"><div class="debt-icon orange">N</div><div class="debt-info"><strong>Cartão Nubank</strong><span>Cartão de crédito · próxima: 12 nov</span></div><div class="debt-balance"><strong>R$ 3.480</strong><span>saldo atual</span></div></div>
+                <div class="debt-row"><div class="debt-icon blue">I</div><div class="debt-info"><strong>Empréstimo Itaú</strong><span>Empréstimo pessoal · próxima: 18 nov</span></div><div class="debt-balance"><strong>R$ 4.200</strong><span>saldo atual</span></div></div>
+                <div class="debt-row"><div class="debt-icon">L</div><div class="debt-info"><strong>Loja Renner</strong><span>Crediário · próxima: 25 nov</span></div><div class="debt-balance"><strong>R$ 1.080</strong><span>saldo atual</span></div></div>
+              </div>
+              <p class="footer-note">Valores de exemplo para demonstração. No app, você informa os valores que quiser — não conectamos à sua conta bancária neste protótipo.</p>
+            </section>
+
+            <div>
+              <section class="card plan-card">
+                <div class="plan-top">
+                  <div class="panel-heading"><div><h2>Seu plano de novembro</h2><p>Um começo possível, feito por você.</p></div><span class="plan-label">EM ANDAMENTO</span></div>
+                  <div class="progress-meta"><span>Progresso do mês</span><strong>32%</strong></div>
+                  <div class="progress-track" role="progressbar" aria-label="Progresso do mês" aria-valuenow="32" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill"></div></div>
+                </div>
+                <div class="plan-detail"><div class="plan-line"><span>Separar para as contas</span><strong>R$ 560</strong></div><div class="plan-line"><span>Próximo passo</span><strong>Revisar juros do cartão</strong></div><button class="plan-button" data-view-link="plano">Acompanhar meu plano</button></div>
+              </section>
+              <div class="quote"><div class="quote-mark">“</div><div><p>Negociar começa por entender o que cabe no seu bolso. Não aceite uma parcela que comprometa despesas essenciais.</p><strong>Uma dica da Virada</strong></div></div>
+              <section class="card panel" style="margin-top:14px">
+                <div class="panel-heading"><div><h2>Próximos vencimentos</h2><p>Um lembrete visual para se organizar.</p></div><button class="text-link" data-view-link="dividas">Ver contas →</button></div>
+                <div class="upcoming-list" id="upcoming-list"></div>
+              </section>
+            </div>
+          </div>
+          <section class="premium-banner" aria-label="Plano premium opcional">
+            <div class="premium-copy"><div class="premium-mark" aria-hidden="true">+</div><div><strong>Mais organização, se fizer sentido para você.</strong><p>Conheça o Virada+: lembretes opcionais, relatórios e exportação do seu plano. O simulador e a organização de dívidas seguem gratuitos.</p></div></div>
+            <div class="premium-action"><div class="premium-price"><b>R$ 9,90/mês</b>preço ilustrativo</div><button class="premium-button" data-action="plus">Conhecer o Plus →</button></div>
+          </section>
+        </section>
+
+        <section class="view" id="view-dividas" aria-labelledby="debts-title">
+          <div class="page-heading"><div><div class="eyebrow">Clareza antes de decidir</div><h1 id="debts-title">Minhas dívidas</h1><p class="intro">Veja tudo em um só lugar. Você escolhe o que quer registrar.</p></div><button class="primary-cta" data-action="add-debt">＋ Adicionar dívida</button></div>
+          <section class="card panel">
+            <div class="panel-heading"><div><h2>Contas registradas</h2><p id="all-debt-summary">Valores informados por você · total: R$ 8.760</p></div><button class="text-link" data-action="add-debt">＋ Adicionar</button></div>
+            <div class="all-debts" id="all-debts"></div>
+            <p class="footer-note">A Virada não consulta birôs de crédito, não acessa seu banco e não negocia em seu nome. Confirme saldos e condições diretamente com cada credor.</p>
+          </section>
+        </section>
+
+        <section class="view" id="view-plano" aria-labelledby="plan-title">
+          <div class="page-heading"><div><div class="eyebrow">Consistência acima da pressa</div><h1 id="plan-title">Meu plano possível</h1><p class="intro">Uma organização inicial, que você pode ajustar à sua realidade.</p></div></div>
+          <section class="card panel" style="margin-bottom:16px">
+            <div class="panel-heading"><div><h2>Seu mês, passo a passo</h2><p>Estimativa ilustrativa com base nos dados registrados.</p></div><span class="plan-label">NOVEMBRO</span></div>
+            <div class="progress-meta"><span>Etapas concluídas</span><strong>1 de 3</strong></div><div class="progress-track"><div class="progress-fill"></div></div>
+            <div class="steps" style="margin-top:19px">
+              <article class="card step-card"><div class="step-num">✓</div><div><h3>Mapear suas contas</h3><p>Você já reuniu as informações principais. Isso ajuda a tomar decisões com menos ansiedade.</p></div></article>
+              <article class="card step-card"><div class="step-num">2</div><div><h3>Entender os custos</h3><p>Compare taxas, encargos e o Custo Efetivo Total (CET) nos canais oficiais dos credores.</p></div></article>
+              <article class="card step-card"><div class="step-num">3</div><div><h3>Escolher uma proposta</h3><p>Antes de aceitar, confira se a parcela cabe depois de moradia, alimentação e contas essenciais.</p></div></article>
+            </div>
+          </section>
+          <div class="sim-grid">
+            <section class="card sim-panel" aria-labelledby="affordability-title">
+              <div class="panel-heading"><div><h2 id="affordability-title">Radar de parcela</h2><p>Quanto sobra depois do que você escolheu priorizar?</p></div><span class="plan-label">GRATUITO</span></div>
+              <p class="sim-help">Preencha com valores mensais aproximados. A conta usa somente os dados que você informa aqui e não é uma recomendação financeira.</p>
+              <div class="sim-fields">
+                <div class="field"><label for="monthly-income">Renda líquida do mês (R$)</label><input id="monthly-income" inputmode="decimal" value="4.200" aria-describedby="affordability-result"></div>
+                <div class="field"><label for="essential-costs">Despesas essenciais (R$)</label><input id="essential-costs" inputmode="decimal" value="2.650" aria-describedby="affordability-result"></div>
+                <div class="field"><label for="existing-payments">Parcelas mínimas atuais (R$)</label><input id="existing-payments" inputmode="decimal" value="550" aria-describedby="affordability-result"></div>
+                <div class="field"><label for="buffer-amount">Valor que quer preservar (R$)</label><input id="buffer-amount" inputmode="decimal" value="500" aria-describedby="affordability-result"></div>
+                <div class="field"><label for="candidate-payment">Parcela em avaliação (R$)</label><input id="candidate-payment" inputmode="decimal" value="280" aria-describedby="affordability-result"></div>
+              </div>
+              <div class="sim-result" id="affordability-result" role="status" aria-live="polite"></div>
+              <p class="footer-note">O resultado é uma subtração simples, não considera mudanças futuras, juros ou outros gastos que você não informou. Não comprometa alimentação, moradia, saúde ou outras necessidades básicas.</p>
+            </section>
+            <section class="card sim-panel" aria-labelledby="offer-title">
+              <div class="panel-heading"><div><h2 id="offer-title">Compare duas propostas</h2><p>Some entrada e parcelas para enxergar o total informado.</p></div><button class="sim-reset" type="button" data-action="reset-offers">Restaurar exemplo</button></div>
+              <p class="sim-help">Use o valor total de cada parcela e confirme com o credor se os valores incluem todos os juros, taxas e encargos.</p>
+              <div class="sim-fields">
+                <div class="field"><label for="offer-a-entry">A · Entrada (R$)</label><input id="offer-a-entry" inputmode="decimal" value="100" aria-describedby="offer-result"></div>
+                <div class="field"><label for="offer-a-count">A · Número de parcelas</label><input id="offer-a-count" type="number" min="1" step="1" value="12" aria-describedby="offer-result"></div>
+                <div class="field"><label for="offer-a-installment">A · Valor da parcela (R$)</label><input id="offer-a-installment" inputmode="decimal" value="180" aria-describedby="offer-result"></div>
+                <div class="field"><label for="offer-b-entry">B · Entrada (R$)</label><input id="offer-b-entry" inputmode="decimal" value="0" aria-describedby="offer-result"></div>
+                <div class="field"><label for="offer-b-count">B · Número de parcelas</label><input id="offer-b-count" type="number" min="1" step="1" value="10" aria-describedby="offer-result"></div>
+                <div class="field"><label for="offer-b-installment">B · Valor da parcela (R$)</label><input id="offer-b-installment" inputmode="decimal" value="240" aria-describedby="offer-result"></div>
+              </div>
+              <div class="sim-result" id="offer-result" role="status" aria-live="polite"></div>
+              <p class="footer-note">A menor soma não é automaticamente a melhor opção. Considere se a entrada e cada parcela cabem no seu orçamento, confira o contrato e não aceite sob pressão.</p>
+            </section>
+          </div>
+          <div class="quote"><div class="quote-mark">i</div><div><p>Não existe uma solução única. Se a proposta não couber no seu orçamento, não aceite por pressão. Busque orientação gratuita de órgãos de defesa do consumidor ou do Procon da sua região.</p><strong>Informação para uma escolha consciente</strong></div></div>
+        </section>
+
+        <section class="view" id="view-orcamento" aria-labelledby="budget-title">
+          <div class="page-heading"><div><div class="eyebrow">O essencial vem primeiro</div><h1 id="budget-title">Orçamento do mês</h1><p class="intro">Uma visão simples para decidir com mais tranquilidade, sem julgar suas escolhas.</p></div><div class="date-pill">Protótipo: os valores não são salvos</div></div>
+          <div class="budget-layout">
+            <section class="card budget-panel">
+              <div class="panel-heading"><div><h2>Distribua seu mês</h2><p>Use estimativas líquidas e ajuste os campos ao seu momento.</p></div><button class="sim-reset" type="button" data-action="reset-budget">Restaurar exemplo</button></div>
+              <div class="budget-fields">
+                <div class="field"><label for="budget-income">Renda líquida do mês (R$)</label><input id="budget-income" inputmode="decimal" value="4.200"></div>
+                <div class="field"><label for="budget-essentials">Moradia, contas e alimentação (R$)</label><input id="budget-essentials" inputmode="decimal" value="2.300"></div>
+                <div class="field"><label for="budget-debts">Parcelas e acordos atuais (R$)</label><input id="budget-debts" inputmode="decimal" value="550"></div>
+                <div class="field"><label for="budget-variable">Transporte e outros gastos (R$)</label><input id="budget-variable" inputmode="decimal" value="500"></div>
+                <div class="field"><label for="budget-reserve">Reserva que deseja guardar (R$)</label><input id="budget-reserve" inputmode="decimal" value="300"></div>
+              </div>
+              <p class="budget-disclaimer">Não existe orçamento perfeito. Se a soma ficar negativa, isso não é falha sua: é um sinal para priorizar necessidades básicas e procurar orientação gratuita. O app não consulta contas bancárias.</p>
+            </section>
+            <section class="budget-result" aria-live="polite">
+              <small>Saldo estimado após os valores informados</small>
+              <strong class="money-value" id="budget-balance">R$ 550,00</strong>
+              <p id="budget-message">Estimativa simples com base apenas nos dados que você preencheu.</p>
+              <div class="budget-bar" role="progressbar" aria-label="Parte da renda comprometida pelos valores informados" aria-valuemin="0" aria-valuemax="100" aria-valuenow="87"><div class="budget-bar-fill" id="budget-bar-fill"></div></div>
+              <div class="budget-breakdown">
+                <div class="budget-line"><span>Renda</span><strong class="money-value" id="budget-line-income">R$ 4.200,00</strong></div>
+                <div class="budget-line"><span>Essenciais</span><strong class="money-value" id="budget-line-essentials">R$ 2.300,00</strong></div>
+                <div class="budget-line"><span>Dívidas e acordos</span><strong class="money-value" id="budget-line-debts">R$ 550,00</strong></div>
+                <div class="budget-line"><span>Outros gastos</span><strong class="money-value" id="budget-line-variable">R$ 500,00</strong></div>
+                <div class="budget-line"><span>Reserva desejada</span><strong class="money-value" id="budget-line-reserve">R$ 300,00</strong></div>
+              </div>
+            </section>
+          </div>
+          <div class="quote"><div class="quote-mark">♡</div><div><p>Você pode ajustar esses números sem culpa. Um bom plano é aquele que respeita sua realidade e pode ser revisto quando ela mudar.</p><strong>Virada · sem julgamento</strong></div></div>
+        </section>
+
+        <section class="view" id="view-conteudos" aria-labelledby="learn-title">
+          <div class="page-heading"><div><div class="eyebrow">Conhecimento que cabe no bolso</div><h1 id="learn-title">Aprender sem julgamento</h1><p class="intro">Conteúdo prático para você negociar e planejar com mais confiança.</p></div></div>
+          <div class="steps">
+            <article class="card step-card"><div class="step-num">01</div><div><h3>Como comparar propostas</h3><p>Olhe além do valor da parcela: prazo, juros, encargos e valor total são importantes.</p></div></article>
+            <article class="card step-card"><div class="step-num">02</div><div><h3>O que é o CET?</h3><p>O Custo Efetivo Total ajuda a entender o custo completo de um crédito ou renegociação.</p></div></article>
+            <article class="card step-card"><div class="step-num">03</div><div><h3>Como montar um orçamento realista</h3><p>Comece pelo essencial e reserve espaço para imprevistos antes de assumir parcelas.</p></div></article>
+          </div>
+          <p class="footer-note">Conteúdo educativo, não é consultoria financeira ou jurídica. Confirme as condições diretamente com a instituição responsável.</p>
+        </section>
+        <section class="feedback-panel" id="feedback" aria-labelledby="feedback-title">
+          <h2 id="feedback-title">Sua opinião ajuda a Virada a melhorar</h2>
+          <p>Conte como foi testar o protótipo. Não informe nome, contato, renda, dívidas ou outros dados pessoais e financeiros.</p>
+          <iframe class="feedback-form" title="Formulário de avaliação da Virada" src="https://docs.google.com/forms/d/e/1FAIpQLSc26Dao8NV71Lx51j-c2uicB0odT9kF8FDiQB_YxFtDumQ-lQ/viewform?embedded=true" loading="lazy">Carregando formulário de avaliação…</iframe>
+          <p class="feedback-privacy">As respostas deste formulário são enviadas ao Google Forms. O protótipo não recebe nem armazena as informações digitadas nele.</p>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Navegação inferior">
+    <button class="active" data-view="inicio"><svg viewBox="0 0 24 24" fill="none"><path d="m4 10 8-6 8 6v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Início</button>
+    <button data-view="dividas"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="14" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M4 9h16M8 14h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Dívidas</button>
+    <button data-view="plano"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19V5m0 14h15M8 15l3-4 3 2 5-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Plano</button>
+    <button data-view="orcamento"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16M8 4v4m8 2v4m-5 2v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Orçamento</button>
+    <button data-view="conteudos"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4.5h11.5A2.5 2.5 0 0 1 19 7v13H7a2 2 0 0 1-2-2V4.5Z" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 9h7M8.5 12h7M8.5 15h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Aprender</button>
+  </nav>
+
+  <div class="modal-backdrop" id="debt-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <form class="modal" id="debt-form">
+      <div class="modal-head"><div><h2 id="modal-title">Adicionar uma dívida</h2><p>Registre apenas o que se sentir confortável em informar.</p></div><button class="close-button" type="button" aria-label="Fechar" data-action="close-modal">×</button></div>
+      <div class="field"><label for="creditor">Nome do credor ou apelido</label><input id="creditor" name="creditor" placeholder="Ex.: Cartão do banco" required maxlength="40"></div>
+      <div class="field-row"><div class="field"><label for="amount">Saldo atual (R$)</label><input id="amount" name="amount" inputmode="decimal" placeholder="0,00" required></div><div class="field"><label for="due">Próximo vencimento</label><input id="due" name="due" type="date"></div></div>
+      <div class="field"><label for="kind">Tipo de dívida</label><select id="kind" name="kind"><option>Cartão de crédito</option><option>Empréstimo pessoal</option><option>Crediário</option><option>Conta de consumo</option><option>Outra</option></select></div>
+      <div class="modal-actions"><button class="cancel-button" type="button" data-action="close-modal">Cancelar</button><button class="save-button" type="submit">Salvar no meu espaço</button></div>
+    </form>
+  </div>
+  <div class="modal-backdrop" id="plus-modal" role="dialog" aria-modal="true" aria-labelledby="plus-title">
+    <section class="modal">
+      <div class="modal-head"><div><div class="eyebrow">Opcional · cancele quando quiser</div><h2 id="plus-title">Virada+, no seu ritmo</h2><p>Ferramentas extras para organizar sua vida financeira sem pressão para contratar.</p></div><button class="close-button" type="button" aria-label="Fechar" data-action="close-plus">×</button></div>
+      <div class="empty-note"><strong>R$ 9,90/mês</strong> · valor ilustrativo para pesquisa de conceito<br><br>Inclui lembretes opcionais, relatórios e exportação do plano. A organização de dívidas, o conteúdo educativo e o simulador continuam gratuitos.</div>
+      <div class="modal-actions"><button class="cancel-button" type="button" data-action="close-plus">Agora não</button><button class="save-button" type="button" data-action="plus-interest">Tenho interesse</button></div>
+      <p class="footer-note">Este protótipo não processa pagamentos nem inicia uma assinatura.</p>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const debtData = [
+      { name: "Cartão exemplo A", kind: "Cartão de crédito", amount: 3480, due: "2026-11-12", icon: "A", tone: "orange" },
+      { name: "Empréstimo exemplo B", kind: "Empréstimo pessoal", amount: 4200, due: "2026-11-18", icon: "B", tone: "blue" },
+      { name: "Conta exemplo C", kind: "Crediário", amount: 1080, due: "2026-11-25", icon: "C", tone: "" }
+    ];
+    const demoDebts = debtData.map(item => ({ ...item }));
+    const money = value => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 2 }).format(value);
+    const escapeHTML = value => String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    const iconTone = tone => tone ? ` ${tone}` : "";
+    const modal = document.getElementById("debt-modal");
+    const toast = document.getElementById("toast");
+    let toastTimer;
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
+    }
+
+    async function sharePositiveMessage() {
+      const message = "Dei mais um passo para organizar minha vida financeira. Um passo de cada vez.";
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: "Um passo de cada vez", text: message });
+          return;
+        } catch (error) {
+          if (error.name === "AbortError") return;
+          showToast("Não foi possível abrir o compartilhamento agora. Tente novamente mais tarde.");
+          return;
+        }
+      }
+      if (navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(message);
+          showToast("Mensagem de incentivo copiada. Ela não inclui dados financeiros.");
+          return;
+        } catch (error) {
+          showToast("Não foi possível copiar automaticamente. Selecione e copie: " + message);
+          return;
+        }
+      }
+      showToast("Compartilhe esta mensagem: " + message);
+    }
+
+    function parseBRL(value) {
+      const normalized = String(value).trim().replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".");
+      return normalized ? Number(normalized) : NaN;
+    }
+
+    function formatDue(rawDate) {
+      if (!rawDate) return "a informar";
+      const date = new Date(`${rawDate}T12:00:00`);
+      return Number.isNaN(date.getTime())
+        ? rawDate
+        : new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(date).replace(".", "");
+    }
+
+    function showSimulationResult(element, heading, detail, warning = false) {
+      element.classList.toggle("warning", warning);
+      element.innerHTML = `<strong>${heading}</strong><span>${detail}</span>`;
+    }
+
+    function updateSimulators() {
+      const readAmount = id => parseBRL(document.getElementById(id).value);
+      const income = readAmount("monthly-income");
+      const essentials = readAmount("essential-costs");
+      const currentPayments = readAmount("existing-payments");
+      const buffer = readAmount("buffer-amount");
+      const candidate = readAmount("candidate-payment");
+      const affordabilityResult = document.getElementById("affordability-result");
+      const amounts = [income, essentials, currentPayments, buffer, candidate];
+
+      if (amounts.some(value => !Number.isFinite(value) || value < 0)) {
+        showSimulationResult(affordabilityResult, "Confira os valores", "Informe apenas valores iguais ou maiores que zero, usando vírgula para centavos.", true);
+      } else {
+        const remainingBeforeProposal = income - essentials - currentPayments - buffer;
+        const available = Math.max(0, remainingBeforeProposal);
+        if (remainingBeforeProposal < 0) {
+          showSimulationResult(
+            affordabilityResult,
+            "Seus compromissos já passam da renda informada",
+            `A diferença é de ${money(Math.abs(remainingBeforeProposal))}, antes de considerar uma nova parcela. Reavalie com cuidado e priorize as necessidades essenciais.`,
+            true
+          );
+        } else if (candidate > available) {
+          showSimulationResult(
+            affordabilityResult,
+            "A parcela excede o espaço que você reservou",
+            `Faltariam ${money(candidate - available)} pelos valores informados. Isso não prevê o futuro; revise os números ou peça condições diferentes sem comprometer o essencial.`,
+            true
+          );
+        } else {
+          showSimulationResult(
+            affordabilityResult,
+            `Espaço mensal informado: ${money(available)}`,
+            `Com essa parcela, sobrariam ${money(available - candidate)} do valor que você reservou. É uma simulação pessoal, não uma garantia de que a proposta seja adequada.`
+          );
+        }
+      }
+
+      const offerAEntry = readAmount("offer-a-entry");
+      const offerACount = Number(document.getElementById("offer-a-count").value);
+      const offerAInstallment = readAmount("offer-a-installment");
+      const offerBEntry = readAmount("offer-b-entry");
+      const offerBCount = Number(document.getElementById("offer-b-count").value);
+      const offerBInstallment = readAmount("offer-b-installment");
+      const offerResult = document.getElementById("offer-result");
+      const offers = [offerAEntry, offerAInstallment, offerBEntry, offerBInstallment];
+
+      if (offers.some(value => !Number.isFinite(value) || value < 0) ||
+          !Number.isInteger(offerACount) || offerACount < 1 ||
+          !Number.isInteger(offerBCount) || offerBCount < 1) {
+        showSimulationResult(offerResult, "Confira as propostas", "Informe entradas e parcelas iguais ou maiores que zero e a quantidade inteira de parcelas.", true);
+        return;
+      }
+
+      const totalA = offerAEntry + offerACount * offerAInstallment;
+      const totalB = offerBEntry + offerBCount * offerBInstallment;
+      const comparison = totalA === totalB
+        ? "As duas somas informadas são iguais."
+        : `A soma informada para a proposta ${totalA < totalB ? "A" : "B"} é menor (${money(Math.min(totalA, totalB))}).`;
+      showSimulationResult(offerResult, `A: ${money(totalA)} · B: ${money(totalB)}`, comparison);
+    }
+
+    function updateBudget() {
+      const readAmount = id => parseBRL(document.getElementById(id).value);
+      const income = readAmount("budget-income");
+      const essentials = readAmount("budget-essentials");
+      const debts = readAmount("budget-debts");
+      const variable = readAmount("budget-variable");
+      const reserve = readAmount("budget-reserve");
+      const values = [income, essentials, debts, variable, reserve];
+      const balance = document.getElementById("budget-balance");
+      const message = document.getElementById("budget-message");
+      const progress = document.querySelector(".budget-result .budget-bar");
+      const fill = document.getElementById("budget-bar-fill");
+
+      if (values.some(value => !Number.isFinite(value) || value < 0)) {
+        balance.textContent = "Confira os valores";
+        message.textContent = "Informe valores iguais ou maiores que zero, usando vírgula para centavos.";
+        progress.setAttribute("aria-valuenow", "0");
+        fill.style.width = "0%";
+        return;
+      }
+
+      const spent = essentials + debts + variable + reserve;
+      const remaining = income - spent;
+      const committedPercent = income > 0 ? Math.min(100, Math.round(spent / income * 100)) : 0;
+      balance.textContent = money(remaining);
+      balance.classList.toggle("warning", remaining < 0);
+      message.textContent = remaining < 0
+        ? `A soma informada excede a renda em ${money(Math.abs(remaining))}. Revise o que puder, sem deixar necessidades básicas de lado.`
+        : "Estimativa simples com base apenas nos dados que você preencheu.";
+      progress.setAttribute("aria-valuenow", String(committedPercent));
+      fill.style.width = `${committedPercent}%`;
+      document.getElementById("budget-line-income").textContent = money(income);
+      document.getElementById("budget-line-essentials").textContent = money(essentials);
+      document.getElementById("budget-line-debts").textContent = money(debts);
+      document.getElementById("budget-line-variable").textContent = money(variable);
+      document.getElementById("budget-line-reserve").textContent = money(reserve);
+    }
+
+    function resetTestData() {
+      debtData.splice(0, debtData.length, ...demoDebts.map(item => ({ ...item })));
+      document.getElementById("debt-form").reset();
+      document.getElementById("monthly-income").value = "4.200";
+      document.getElementById("essential-costs").value = "2.650";
+      document.getElementById("existing-payments").value = "550";
+      document.getElementById("buffer-amount").value = "500";
+      document.getElementById("candidate-payment").value = "280";
+      document.getElementById("budget-income").value = "4.200";
+      document.getElementById("budget-essentials").value = "2.300";
+      document.getElementById("budget-debts").value = "550";
+      document.getElementById("budget-variable").value = "500";
+      document.getElementById("budget-reserve").value = "300";
+      renderDebts();
+      updateSimulators();
+      updateBudget();
+      showToast("Alterações descartadas. Exemplos de demonstração restaurados.");
+    }
+
+    function renderDebts() {
+      const total = debtData.reduce((sum, item) => sum + item.amount, 0);
+      document.getElementById("total-debt").textContent = money(total);
+      document.getElementById("debt-count").textContent = debtData.length;
+      document.getElementById("metric-debt-count").textContent = `${debtData.length} ${debtData.length === 1 ? "conta" : "contas"}`;
+      document.getElementById("all-debt-summary").textContent = `Valores informados por você · total: ${money(total)}`;
+      document.getElementById("debt-list").innerHTML = debtData.map(item => `
+        <div class="debt-row"><div class="debt-icon${iconTone(item.tone)}">${escapeHTML(item.icon)}</div><div class="debt-info"><strong>${escapeHTML(item.name)}</strong><span>${escapeHTML(item.kind)} · próxima: ${escapeHTML(formatDue(item.due))}</span></div><div class="debt-balance"><strong>${money(item.amount)}</strong><span>saldo atual</span></div></div>
+      `).join("");
+      document.getElementById("all-debts").innerHTML = debtData.length
+        ? debtData.map(item => `
+          <article class="debt-wide"><div class="debt-wide-main"><div class="debt-icon${iconTone(item.tone)}">${escapeHTML(item.icon)}</div><div><strong>${escapeHTML(item.name)}</strong><small>${escapeHTML(item.kind)} · vencimento ${escapeHTML(formatDue(item.due))}</small></div></div><div class="debt-wide-right"><b>${money(item.amount)}</b><button type="button" data-action="debt-info">Ver detalhes</button></div></article>
+        `).join("")
+        : '<div class="empty-note">Nenhuma dívida registrada. Você pode adicionar uma quando quiser.</div>';
+      const upcoming = debtData.filter(item => item.due).sort((a, b) => a.due.localeCompare(b.due)).slice(0, 3);
+      document.getElementById("upcoming-list").innerHTML = upcoming.length
+        ? upcoming.map(item => {
+          const date = new Date(`${item.due}T12:00:00`);
+          const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit" }).format(date);
+          const month = new Intl.DateTimeFormat("pt-BR", { month: "short" }).format(date).replace(".", "");
+          return `<div class="upcoming-row"><div class="upcoming-date"><b>${day}</b><small>${month}</small></div><div><strong>${escapeHTML(item.name)}</strong><span>${escapeHTML(item.kind)}</span></div><b class="money-value">${money(item.amount)}</b></div>`;
+        }).join("")
+        : '<div class="empty-note">Adicione um vencimento para ver seus próximos compromissos.</div>';
+    }
+
+    function setView(view) {
+      document.querySelectorAll(".view").forEach(section => section.classList.toggle("active", section.id === `view-${view}`));
+      document.querySelectorAll("[data-view]").forEach(button => button.classList.toggle("active", button.dataset.view === view));
+      const labels = { inicio: "Visão geral", dividas: "Minhas dívidas", plano: "Meu plano", orcamento: "Orçamento", conteudos: "Aprender" };
+      document.getElementById("crumb-current").textContent = labels[view] || labels.inicio;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (view === "orcamento") updateBudget();
+    }
+
+    document.addEventListener("click", event => {
+      const viewButton = event.target.closest("[data-view]");
+      const viewLink = event.target.closest("[data-view-link]");
+      const actionButton = event.target.closest("[data-action]");
+      if (viewButton) setView(viewButton.dataset.view);
+      if (viewLink) {
+        setView(viewLink.dataset.viewLink);
+        const focusTarget = viewLink.dataset.focusTarget;
+        if (focusTarget) {
+          setTimeout(() => {
+            const target = document.getElementById(focusTarget);
+            target?.focus({ preventScroll: true });
+            target?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 120);
+        }
+      }
+      if (!actionButton) return;
+      switch (actionButton.dataset.action) {
+        case "add-debt":
+          modal.classList.add("open");
+          document.getElementById("creditor").focus();
+          break;
+        case "close-modal":
+          modal.classList.remove("open");
+          break;
+        case "support":
+          showToast("Procure o Procon da sua região ou os canais públicos de orientação ao consumidor.");
+          break;
+        case "notifications":
+          showToast("Você está em dia com as novidades. Suas notificações estão pausadas neste protótipo.");
+          break;
+        case "privacy": {
+          const enabled = document.body.classList.toggle("privacy-mode");
+          actionButton.setAttribute("aria-pressed", String(enabled));
+          actionButton.setAttribute("aria-label", enabled ? "Exibir valores na tela (apenas visual)" : "Ocultar valores na tela (apenas visual)");
+          actionButton.title = enabled ? "Exibir valores nesta tela" : "Ocultar valores visualmente nesta tela";
+          showToast(enabled ? "Valores desfocados apenas nesta tela. Isso não protege dados armazenados." : "Valores visíveis novamente.");
+          break;
+        }
+        case "share":
+          sharePositiveMessage();
+          break;
+        case "reset-budget":
+          resetTestData();
+          break;
+        case "reset-test":
+          resetTestData();
+          break;
+        case "debt-info":
+          showToast("Confira saldo, juros e CET diretamente no canal oficial do credor antes de negociar.");
+          break;
+        case "plus":
+          document.getElementById("plus-modal").classList.add("open");
+          break;
+        case "close-plus":
+          document.getElementById("plus-modal").classList.remove("open");
+          break;
+        case "plus-interest":
+          document.getElementById("plus-modal").classList.remove("open");
+          showToast("Obrigado pelo interesse! Esta oferta é ilustrativa e ainda não recebe pagamentos.");
+          break;
+        case "reset-offers":
+          document.getElementById("offer-a-entry").value = "100";
+          document.getElementById("offer-a-count").value = "12";
+          document.getElementById("offer-a-installment").value = "180";
+          document.getElementById("offer-b-entry").value = "0";
+          document.getElementById("offer-b-count").value = "10";
+          document.getElementById("offer-b-installment").value = "240";
+          updateSimulators();
+          break;
+      }
+    });
+
+    modal.addEventListener("click", event => {
+      if (event.target === modal) modal.classList.remove("open");
+    });
+    document.getElementById("plus-modal").addEventListener("click", event => {
+      if (event.target === event.currentTarget) event.currentTarget.classList.remove("open");
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") modal.classList.remove("open");
+      if (event.key === "Escape") document.getElementById("plus-modal").classList.remove("open");
+    });
+    document.getElementById("debt-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const amountValue = form.elements.amount.value.trim().replace(/\s/g, "").replace(/\./g, "").replace(",", ".");
+      const amount = Number(amountValue);
+      const name = form.elements.creditor.value.trim();
+      if (!name || !Number.isFinite(amount) || amount <= 0) {
+        showToast("Confira o nome e informe um saldo maior que zero.");
+        return;
+      }
+      const rawDate = form.elements.due.value;
+      const icon = name.slice(0, 1).toLocaleUpperCase("pt-BR");
+      debtData.push({ name, kind: form.elements.kind.value, amount, due: rawDate, icon, tone: "" });
+      renderDebts();
+      form.reset();
+      modal.classList.remove("open");
+      setView("dividas");
+      showToast("Dívida adicionada ao seu espaço.");
+    });
+    document.getElementById("view-plano").addEventListener("input", updateSimulators);
+    document.getElementById("view-orcamento").addEventListener("input", updateBudget);
+    document.getElementById("date-label").textContent = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
+    renderDebts();
+    updateSimulators();
+    updateBudget();
+  </script>
+</body>
+</html>
